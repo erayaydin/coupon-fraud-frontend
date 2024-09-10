@@ -1,6 +1,7 @@
-import { Box, Button, FormControl, FormLabel, Stack, styled, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, FormControl, FormLabel, Stack, styled, TextField, Typography } from '@mui/material'
 import MuiCard from '@mui/material/Card'
 import { FormEvent, useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -31,15 +32,40 @@ const CheckoutContainer = styled(Stack)(({ theme }) => ({
 
 export default function Checkout() {
   const [coupon, setCoupon] = useState('PROMO1000')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // @ts-ignore
+  const [couponClaimed, setCouponClaimed] = useState(false)
   const [couponError, setCouponError] = useState(false)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // @ts-ignore
   const [couponErrorMessage, setCouponErrorMessage] = useState('')
+
+  const { mutate: claimCoupon, isPending } = useMutation({
+    mutationKey: ['request coupon claim'],
+    mutationFn: async ({ coupon }: { coupon: string }) => {
+      return await fetch(import.meta.env.VITE_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ coupon }),
+      }).then((resp) => resp.json())
+    },
+    onSuccess: (data: { status: string; message: string }) => {
+      if (data.status != 'success') {
+        setCouponError(true)
+        setCouponErrorMessage(data.message)
+        return
+      }
+
+      setCouponClaimed(true)
+    },
+    onError: (error) => {
+      setCouponError(true)
+      setCouponErrorMessage(error.message)
+    },
+  })
 
   const onFormSubmit = (e: FormEvent) => {
     e.preventDefault()
+
+    claimCoupon({ coupon })
   }
 
   return (
@@ -64,11 +90,11 @@ export default function Checkout() {
                 <FormLabel htmlFor='coupon'>Coupon</FormLabel>
                 <TextField
                   error={couponError}
-                  helperText={couponErrorMessage}
                   id='coupon'
                   type='text'
                   name='coupon'
                   value={coupon}
+                  disabled={couponClaimed}
                   onChange={(e) => setCoupon(e.target.value)}
                   placeholder='XXX'
                   autoFocus
@@ -78,9 +104,11 @@ export default function Checkout() {
                   color={couponError ? 'error' : 'primary'}
                 />
               </FormControl>
-              <Button type='submit' fullWidth variant='contained' sx={{ marginTop: '10px' }}>
-                Claim Coupon
+              <Button disabled={couponClaimed} type='submit' fullWidth variant='contained' sx={{ marginTop: '10px' }}>
+                {isPending ? 'Loading...' : 'Claim Coupon'}
               </Button>
+              {couponClaimed && <Alert severity='success'>Coupon claimed!</Alert>}
+              {couponError && <Alert severity='error'>{couponErrorMessage}</Alert>}
             </Box>
           </Card>
         </CheckoutContainer>
