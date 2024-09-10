@@ -5,6 +5,7 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import eslintPluginPrettier from 'eslint-plugin-prettier'
 import eslintConfigPrettier from 'eslint-config-prettier'
+import tanstackQueryPlugin from '@tanstack/eslint-plugin-query'
 
 const prettierConfig = {
   name: "prettier",
@@ -37,5 +38,6 @@ export default tsEslint.config(
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
-  prettierConfig
+  prettierConfig,
+  ...tanstackQueryPlugin.configs['flat/recommended'],
 )
