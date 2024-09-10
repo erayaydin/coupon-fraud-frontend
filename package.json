@@ -17,7 +17,7 @@
   "scripts": {
     "dev": "vite",
     "format": "prettier **/*.{ts,tsx} --write",
-    "lint": "eslint .",
+    "lint": "eslint --max-warnings 0",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
