@@ -7,7 +7,7 @@ import '@fontsource/roboto/400.css'
 import '@fontsource/roboto/500.css'
 import '@fontsource/roboto/700.css'
 import Checkout from './components/Checkout'
-import { FpjsProvider } from '@fingerprintjs/fingerprintjs-pro-react'
+import { FingerprintJSPro, FpjsProvider } from '@fingerprintjs/fingerprintjs-pro-react'
 
 const queryClient = new QueryClient()
 
@@ -26,9 +26,13 @@ const materialTheme = createTheme({
 export default function App() {
   const [showDevtools, setShowDevtools] = useState(false)
 
+  console.log(import.meta.env)
+
   const fpJSOptions = {
     apiKey: import.meta.env.VITE_FINGERPRINT_API_KEY,
     region: import.meta.env.VITE_FINGERPRINT_REGION || 'eu',
+    endpoint: [import.meta.env.VITE_FINGERPRINT_ENDPOINT, FingerprintJSPro.defaultEndpoint],
+    scriptUrlPattern: [import.meta.env.VITE_FINGERPRINT_SCRIPT_URL_PATTERN, FingerprintJSPro.defaultScriptUrlPattern],
   }
 
   useEffect(() => {
