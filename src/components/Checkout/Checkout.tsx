@@ -36,6 +36,7 @@ export default function Checkout() {
   const [couponClaimed, setCouponClaimed] = useState(false)
   const [couponError, setCouponError] = useState(false)
   const [couponErrorMessage, setCouponErrorMessage] = useState('')
+  const [resetPending, setResetPending] = useState(false)
 
   const { getData: getVisitorData } = useVisitorData(
     {
@@ -47,9 +48,9 @@ export default function Checkout() {
   const { mutate: claimCoupon, isPending } = useMutation({
     mutationKey: ['request coupon claim'],
     mutationFn: async ({ coupon }: { coupon: string }) => {
-      const { requestId } = await getVisitorData({ ignoreCache: true });
+      const { requestId } = await getVisitorData({ ignoreCache: true })
 
-      return await fetch(import.meta.env.VITE_API_URL, {
+      return await fetch(import.meta.env.VITE_API_URL + '/api/coupon', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,8 +58,8 @@ export default function Checkout() {
         body: JSON.stringify({ coupon, requestId }),
       }).then((resp) => resp.json())
     },
-    onSuccess: (data: { status: string; message: string }) => {
-      if (data.status != 'success') {
+    onSuccess: (data: { status: boolean; message: string }) => {
+      if (!data.status) {
         setCouponError(true)
         setCouponErrorMessage(data.message)
         return
@@ -76,6 +77,20 @@ export default function Checkout() {
     e.preventDefault()
 
     claimCoupon({ coupon })
+  }
+
+  const onReset = () => {
+    setResetPending(true)
+
+    fetch(import.meta.env.VITE_API_URL + '/api/use-case', {
+      method: 'DELETE',
+    }).then(() => {
+      setResetPending(false)
+      setCoupon('PROMO1000')
+      setCouponClaimed(false)
+      setCouponError(false)
+      setCouponErrorMessage('')
+    })
   }
 
   return (
@@ -116,6 +131,9 @@ export default function Checkout() {
               </FormControl>
               <Button disabled={couponClaimed} type='submit' fullWidth variant='contained' sx={{ marginTop: '10px' }}>
                 {isPending ? 'Loading...' : 'Claim Coupon'}
+              </Button>
+              <Button type='button' fullWidth onClick={onReset} variant='outlined' sx={{ marginTop: '10px' }}>
+                Reset Use-Case
               </Button>
               {couponClaimed && <Alert severity='success'>Coupon claimed!</Alert>}
               {couponError && <Alert severity='error'>{couponErrorMessage}</Alert>}
