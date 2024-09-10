@@ -119,7 +119,7 @@ export default function Checkout() {
                   type='text'
                   name='coupon'
                   value={coupon}
-                  disabled={couponClaimed}
+                  disabled={couponClaimed || resetPending}
                   onChange={(e) => setCoupon(e.target.value)}
                   placeholder='XXX'
                   autoFocus
@@ -129,10 +129,17 @@ export default function Checkout() {
                   color={couponError ? 'error' : 'primary'}
                 />
               </FormControl>
-              <Button disabled={couponClaimed} type='submit' fullWidth variant='contained' sx={{ marginTop: '10px' }}>
+              <Button disabled={couponClaimed || resetPending} type='submit' fullWidth variant='contained' sx={{ marginTop: '10px' }}>
                 {isPending ? 'Loading...' : 'Claim Coupon'}
               </Button>
-              <Button type='button' fullWidth onClick={onReset} variant='outlined' sx={{ marginTop: '10px' }}>
+              <Button
+                type='button'
+                disabled={resetPending}
+                fullWidth
+                onClick={onReset}
+                variant='outlined'
+                sx={{ marginTop: '10px' }}
+              >
                 Reset Use-Case
               </Button>
               {couponClaimed && <Alert severity='success'>Coupon claimed!</Alert>}
