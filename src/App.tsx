@@ -7,6 +7,7 @@ import '@fontsource/roboto/400.css'
 import '@fontsource/roboto/500.css'
 import '@fontsource/roboto/700.css'
 import Checkout from './components/Checkout'
+import { FpjsProvider } from '@fingerprintjs/fingerprintjs-pro-react'
 
 const queryClient = new QueryClient()
 
@@ -25,6 +26,11 @@ const materialTheme = createTheme({
 export default function App() {
   const [showDevtools, setShowDevtools] = useState(false)
 
+  const fpJSOptions = {
+    apiKey: import.meta.env.VITE_FINGERPRINT_API_KEY,
+    region: import.meta.env.VITE_FINGERPRINT_REGION || 'eu',
+  }
+
   useEffect(() => {
     // @ts-expect-error only some browsers support toggleDevtools signal
     window.toggleDevtools = () => setShowDevtools((old) => !old)
@@ -32,16 +38,18 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={materialTheme}>
-        <CssBaseline enableColorScheme />
-        <Checkout />
-      </ThemeProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
-      {showDevtools && (
-        <Suspense fallback={null}>
-          <ReactQueryDevtoolsProduction />
-        </Suspense>
-      )}
+      <FpjsProvider loadOptions={fpJSOptions}>
+        <ThemeProvider theme={materialTheme}>
+          <CssBaseline enableColorScheme />
+          <Checkout />
+        </ThemeProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
+        {showDevtools && (
+          <Suspense fallback={null}>
+            <ReactQueryDevtoolsProduction />
+          </Suspense>
+        )}
+      </FpjsProvider>
     </QueryClientProvider>
   )
 }

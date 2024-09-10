@@ -2,6 +2,7 @@ import { Alert, Box, Button, FormControl, FormLabel, Stack, styled, TextField, T
 import MuiCard from '@mui/material/Card'
 import { FormEvent, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
+import { useVisitorData } from '@fingerprintjs/fingerprintjs-pro-react'
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -36,15 +37,24 @@ export default function Checkout() {
   const [couponError, setCouponError] = useState(false)
   const [couponErrorMessage, setCouponErrorMessage] = useState('')
 
+  const { getData: getVisitorData } = useVisitorData(
+    {
+      ignoreCache: true,
+    },
+    { immediate: false }
+  )
+
   const { mutate: claimCoupon, isPending } = useMutation({
     mutationKey: ['request coupon claim'],
     mutationFn: async ({ coupon }: { coupon: string }) => {
+      const { requestId } = await getVisitorData({ ignoreCache: true });
+
       return await fetch(import.meta.env.VITE_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ coupon }),
+        body: JSON.stringify({ coupon, requestId }),
       }).then((resp) => resp.json())
     },
     onSuccess: (data: { status: string; message: string }) => {
