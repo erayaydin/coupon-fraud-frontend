@@ -129,7 +129,13 @@ export default function Checkout() {
                   color={couponError ? 'error' : 'primary'}
                 />
               </FormControl>
-              <Button disabled={couponClaimed || resetPending} type='submit' fullWidth variant='contained' sx={{ marginTop: '10px' }}>
+              <Button
+                disabled={couponClaimed || resetPending}
+                type='submit'
+                fullWidth
+                variant='contained'
+                sx={{ marginTop: '10px' }}
+              >
                 {isPending ? 'Loading...' : 'Claim Coupon'}
               </Button>
               <Button
